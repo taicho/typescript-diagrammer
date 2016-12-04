@@ -1,0 +1,1 @@
+{"version":3,"names":[],"mappings":"","sources":["index.js"],"sourcesContent":["\"use strict\";\nvar Processing_1 = require(\"./Processing\");\nvar proc = Processing_1[\"default\"].fromFile(\"/Users/taicho/Google Drive/Current Development/Git/typescript-diagrammer/test/dummytest.ts\");\nvar str = proc.emit();\n"],"file":"index.js"}
