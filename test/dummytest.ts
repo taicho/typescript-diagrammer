@@ -1,5 +1,6 @@
 namespace NamespaceOne {
-    export class ClassOne {
+    export namespace InnerNamespaceOne{
+        export class ClassOne {
         Prop1: string = "fds";
         Prop2: string = "fdsf";
     }
@@ -12,9 +13,19 @@ namespace NamespaceOne {
         Prop1: string = "fsfd";
     }
 
+    export class ClassX extends ClassTwo {
+        constructor() {
+            super();
+        }
+
+        MyProp = 2;
+
+    }
+
     export interface IMyInterface {
         FakeProperty: string;
     }
+   }
 }
 
 
@@ -24,7 +35,7 @@ namespace NamespaceTwo {
         Prop2: string = "fdsf";
     }
 
-    export class ClassFour extends ClassThree implements NamespaceOne.IMyInterface {
+    export class ClassFour extends ClassThree implements NamespaceOne.InnerNamespaceOne.IMyInterface {
         FakeProperty = "fsdf";
 
         constructor() {

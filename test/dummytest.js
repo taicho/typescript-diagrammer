@@ -5,23 +5,35 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var NamespaceOne;
 (function (NamespaceOne) {
-    var ClassOne = (function () {
-        function ClassOne() {
-            this.Prop1 = "fds";
-            this.Prop2 = "fdsf";
-        }
-        return ClassOne;
-    }());
-    NamespaceOne.ClassOne = ClassOne;
-    var ClassTwo = (function (_super) {
-        __extends(ClassTwo, _super);
-        function ClassTwo() {
-            _super.call(this);
-            this.Prop1 = "fsfd";
-        }
-        return ClassTwo;
-    }(ClassOne));
-    NamespaceOne.ClassTwo = ClassTwo;
+    var InnerNamespaceOne;
+    (function (InnerNamespaceOne) {
+        var ClassOne = (function () {
+            function ClassOne() {
+                this.Prop1 = "fds";
+                this.Prop2 = "fdsf";
+            }
+            return ClassOne;
+        }());
+        InnerNamespaceOne.ClassOne = ClassOne;
+        var ClassTwo = (function (_super) {
+            __extends(ClassTwo, _super);
+            function ClassTwo() {
+                _super.call(this);
+                this.Prop1 = "fsfd";
+            }
+            return ClassTwo;
+        }(ClassOne));
+        InnerNamespaceOne.ClassTwo = ClassTwo;
+        var ClassX = (function (_super) {
+            __extends(ClassX, _super);
+            function ClassX() {
+                _super.call(this);
+                this.MyProp = 2;
+            }
+            return ClassX;
+        }(ClassTwo));
+        InnerNamespaceOne.ClassX = ClassX;
+    })(InnerNamespaceOne = NamespaceOne.InnerNamespaceOne || (NamespaceOne.InnerNamespaceOne = {}));
 })(NamespaceOne || (NamespaceOne = {}));
 var NamespaceTwo;
 (function (NamespaceTwo) {
@@ -44,3 +56,5 @@ var NamespaceTwo;
     }(ClassThree));
     NamespaceTwo.ClassFour = ClassFour;
 })(NamespaceTwo || (NamespaceTwo = {}));
+
+//# sourceMappingURL=dummytest.js.map

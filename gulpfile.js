@@ -19,36 +19,69 @@ var sourcemaps = require('gulp-sourcemaps');
 // when they're loaded
 require('babel-register');
 
-gulp.task("ts-test",function(){ 
+gulp.task("ts-test", function () {
 
-  return gulp.src(["lib/**/*.ts","!node_modules","!typings"])   
-        .pipe(tslint({formatter:'verbose'}))
-        .pipe(tslint.report());
+  return gulp.src(["lib/**/*.ts", "!node_modules", "!typings"])
+    .pipe(tslint({ formatter: 'verbose' }))
+    .pipe(tslint.report());
 });
+
+
+// function runTs(projectName) {
+
+//     var tsProject = ts.createProject(projectName);
+
+//     var tsResult = tsProject.src()
+//         .pipe(sourcemaps.init())
+//         .pipe(tsProject())
+        
+//     var pipeline = tsResult.js
+//         .pipe(sourcemaps.write())
+//         .pipe(gulp.dest('.'))
+//         .pipe(uglify())
+//         .pipe(rename({ suffix: '.min' }))
+//         .pipe(gulp.dest('.'))
+
+//     var dts = tsResult.dts
+//         .pipe(gulp.dest('.'))
+
+//     return merge(dts, pipeline);
+
+// }
 
 gulp.task("ts-build", ["ts-test"], function () {
-    return tsProject.src()
-        .pipe(tsProject())            
-        .js.pipe(gulp.dest("./"));
+  return tsProject.src()
+    .pipe(sourcemaps.init())
+    .pipe(ts(tsProject))
+    .js
+    .pipe(sourcemaps.write("./"))
+    .pipe(gulp.dest("./"));
 });
 
-gulp.task("ts-sourcemaps-build", ["ts-build"], function () {
-    return gulp.src(["lib/**/*.js","!node_modules","!typings"])
-        .pipe(sourcemaps.init())
-        .pipe(sourcemaps.write("./"))            
-        .pipe(gulp.dest("./lib"));
-});
+// gulp.task("ts-build", ["ts-test"], function () {
+//   return tsProject.src()        
+//     .pipe(tsProject())
+//     .js    
+//     .pipe(gulp.dest("./"));
+// });
 
-gulp.task('static', ['ts-sourcemaps-build'], function () {
+// gulp.task("ts-sourcemaps-build", ["ts-build"], function () {
+//     return gulp.src(["lib/**/*.js","!node_modules","!typings"])
+//         .pipe(sourcemaps.init())
+//         .pipe(sourcemaps.write("./"))            
+//         .pipe(gulp.dest("./lib"));
+// });
+
+gulp.task('static', ['ts-build'], function () {
   return gulp.src('**/*.js')
     .pipe(excludeGitignore());
-    // .pipe(eslint())
-    // .pipe(eslint.format())
-    // .pipe(eslint.failAfterError());
+  // .pipe(eslint())
+  // .pipe(eslint.format())
+  // .pipe(eslint.failAfterError());
 });
 
 gulp.task('nsp', function (cb) {
-  nsp({package: path.resolve('package.json')}, cb);
+  nsp({ package: path.resolve('package.json') }, cb);
 });
 
 gulp.task('pre-test', function () {
@@ -66,7 +99,7 @@ gulp.task('test', ['pre-test'], function (cb) {
 
   gulp.src('test/**/*.js')
     .pipe(plumber())
-    .pipe(mocha({reporter: 'spec'}))
+    .pipe(mocha({ reporter: 'spec' }))
     .on('error', function (err) {
       mochaErr = err;
     })

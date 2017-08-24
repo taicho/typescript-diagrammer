@@ -21,4 +21,6 @@ export default class DiagramCompilerHost extends DiagramLanguageServiceHost impl
         return "";
     }
 
+    getDirectories = (path) => [];
+
 }

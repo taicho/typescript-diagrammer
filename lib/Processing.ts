@@ -59,6 +59,11 @@ export default class Processor {
         return nodes;
     }
 
+    testCollections(typeChecker: tss.TypeChecker, nodes: tss.Node[]) {
+        let symbols = nodes.map(function (v) { return typeChecker.getSymbolAtLocation(v); }).filter((f) => f != null);
+        let types = symbols.map((s) => { return typeChecker.getDeclaredTypeOfSymbol(s); }).filter((f) => f != null);
+    }
+
     execute() {
         if (!this.Processed) {
             let fileNamePart = "Output.ts";
@@ -69,7 +74,8 @@ export default class Processor {
             let typeChecker = program.getTypeChecker();
             let sourceFile = program.getSourceFile(fileNamePart);
             let nodes = this.getAllNodes(sourceFile);
-
+            let results = this.buildNodesNew(nodes);
+            this.testCollections(typeChecker, nodes);
             this.Processed = true;
             // let syntaxTree = tss.Parser.parse(fileNamePart, tss.SimpleText.fromString(source), /*isDeclaration*/ true,
             //     new tss.ParseOptions(tss.LanguageVersion.EcmaScript5, /*autoSemicolon*/ true));                
@@ -104,6 +110,10 @@ export default class Processor {
 
     toJson() {
         return JSON.stringify(Utilities.toSerializableNodes(this.Nodes));
+    }
+
+    getAllNames(typeChecker: tss.TypeChecker, nodes: tss.Node[]) {
+        return nodes.map((n) => typeChecker.getSymbolAtLocation(n).name);
     }
 
 
@@ -152,6 +162,65 @@ export default class Processor {
         //     arr.push(n.text());
         // }
         return arr.join(".");
+    }
+
+
+    getBaseTypeNames(node: tss.Node) {
+        let results = [];
+        let clauses: tss.HeritageClause[];
+        if (node.kind === tss.SyntaxKind.ClassDeclaration) {
+            let casted = <tss.ClassLikeDeclaration>node;
+            clauses = casted.heritageClauses;
+        }
+        else if (node.kind === tss.SyntaxKind.InterfaceDeclaration) {
+            let casted = <tss.InterfaceDeclaration>node;
+            clauses = casted.heritageClauses;
+        }
+        if (clauses) {
+            for (let i = 0, len = clauses.length; i < len; i++) {
+                let clause = clauses[i];
+                if (clause.types) {
+                    for (let x = 0, len2 = clause.types.length; x < len2; x++) {
+                        let type = clause.types[x];
+                        if (type.expression.kind === tss.SyntaxKind.Identifier) {
+                            results.push(type.expression.getText());
+                        }
+                    }
+                }
+            }
+
+            return results;
+        }
+        return null;
+    }
+
+    buildNodesNew(nodes: tss.Node[]) {
+        let supportedType = tss.SyntaxKind.ClassDeclaration | tss.SyntaxKind.InterfaceDeclaration | tss.SyntaxKind.ModuleDeclaration;
+        nodes = nodes.filter((n) => NodeItem.IsSupportedKindNode(n));
+        let results: NodeItem[] = [];
+        for (let i = 0, len = nodes.length; i < len; i++) {
+            let node = nodes[i];
+            let nodeItem = NodeItem.fromNode(node);
+            results.push(nodeItem);
+        }
+        this.resolveNodes(results);
+        return results;
+    }
+
+    getNodeList(nodes: NodeItem[]): INodeList {
+        let dictionary = {};
+        nodes.forEach((n) => {
+            dictionary[n.FullName] = n;
+        });
+        return dictionary;
+    }
+
+    resolveNodes(nodes: NodeItem[]) {
+        const dictionary = this.getNodeList(nodes);
+        for (let i = 0, len = nodes.length; i < len; i++) {
+            let node = nodes[i];
+            node.resolveParent(dictionary);
+        }
     }
 
 
