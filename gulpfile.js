@@ -1,127 +1,52 @@
-var path = require('path');
-var gulp = require('gulp');
-var eslint = require('gulp-eslint');
-var tslint = require('gulp-tslint');
-var excludeGitignore = require('gulp-exclude-gitignore');
-var mocha = require('gulp-mocha');
-var istanbul = require('gulp-istanbul');
-var nsp = require('gulp-nsp');
-var plumber = require('gulp-plumber');
-var babel = require('gulp-babel');
-var del = require('del');
-var isparta = require('isparta');
-var ts = require("gulp-typescript");
-var tsProject = ts.createProject("tsconfig.json");
-var sourcemaps = require('gulp-sourcemaps');
+const gulp = require('gulp');
+const exec = require('child_process').exec;
+const path = require('path');
+const fs = require('fs');
 
+function executeNpm(commandName) {
+    return (cb) => {
+        exec(`npm run ${commandName}`, (err, stdout, stderr) => {
+            console.log(stdout);
+            if(stderr) {
+                console.log(stderr);
+                // process.exit(1);
+            }   
+            cb();
+        });
+    };
+}
 
-// Initialize the babel transpiler so ES2015 files gets compiled
-// when they're loaded
-require('babel-register');
-
-gulp.task("ts-test", function () {
-
-  return gulp.src(["lib/**/*.ts", "!node_modules", "!typings"])
-    .pipe(tslint({ formatter: 'verbose' }))
-    .pipe(tslint.report());
+gulp.task('tslint', () => {
+    const tslint = require('gulp-tslint');
+    return gulp.src('./src/**/*.ts')
+        .pipe(tslint({
+            formatter: 'verbose'
+        }))
+        .pipe(tslint.report({ emitError: false }));
 });
 
+gulp.task('clean', executeNpm('clean'));
 
-// function runTs(projectName) {
-
-//     var tsProject = ts.createProject(projectName);
-
-//     var tsResult = tsProject.src()
-//         .pipe(sourcemaps.init())
-//         .pipe(tsProject())
-        
-//     var pipeline = tsResult.js
-//         .pipe(sourcemaps.write())
-//         .pipe(gulp.dest('.'))
-//         .pipe(uglify())
-//         .pipe(rename({ suffix: '.min' }))
-//         .pipe(gulp.dest('.'))
-
-//     var dts = tsResult.dts
-//         .pipe(gulp.dest('.'))
-
-//     return merge(dts, pipeline);
-
-// }
-
-gulp.task("ts-build", ["ts-test"], function () {
-  return tsProject.src()
-    .pipe(sourcemaps.init())
-    .pipe(ts(tsProject))
-    .js
-    .pipe(sourcemaps.write("./"))
-    .pipe(gulp.dest("./"));
-});
-
-// gulp.task("ts-build", ["ts-test"], function () {
-//   return tsProject.src()        
-//     .pipe(tsProject())
-//     .js    
-//     .pipe(gulp.dest("./"));
-// });
-
-// gulp.task("ts-sourcemaps-build", ["ts-build"], function () {
-//     return gulp.src(["lib/**/*.js","!node_modules","!typings"])
-//         .pipe(sourcemaps.init())
-//         .pipe(sourcemaps.write("./"))            
-//         .pipe(gulp.dest("./lib"));
-// });
-
-gulp.task('static', ['ts-build'], function () {
-  return gulp.src('**/*.js')
-    .pipe(excludeGitignore());
-  // .pipe(eslint())
-  // .pipe(eslint.format())
-  // .pipe(eslint.failAfterError());
-});
-
-gulp.task('nsp', function (cb) {
-  nsp({ package: path.resolve('package.json') }, cb);
-});
-
-gulp.task('pre-test', function () {
-  return gulp.src('lib/**/*.js')
-    .pipe(excludeGitignore())
-    .pipe(istanbul({
-      includeUntested: true,
-      instrumenter: isparta.Instrumenter
-    }))
-    .pipe(istanbul.hookRequire());
-});
-
-gulp.task('test', ['pre-test'], function (cb) {
-  var mochaErr;
-
-  gulp.src('test/**/*.js')
-    .pipe(plumber())
-    .pipe(mocha({ reporter: 'spec' }))
-    .on('error', function (err) {
-      mochaErr = err;
-    })
-    .pipe(istanbul.writeReports())
-    .on('end', function () {
-      cb(mochaErr);
-    });
-});
-
-gulp.task('watch', function () {
-  gulp.watch(['lib/**/*.js', 'test/**'], ['test']);
-});
-
-gulp.task('babel', ['clean'], function () {
-  return gulp.src('lib/**/*.js')
-    .pipe(babel())
-    .pipe(gulp.dest('dist'));
-});
-
-gulp.task('clean', function () {
-  return del('dist');
-});
-
-gulp.task('prepublish', ['nsp', 'babel']);
-gulp.task('default', ['static', 'test']);
+// Basic build process for TS.
+gulp.task('build-typescript', executeNpm('build-typescript'));
+gulp.task('build', gulp.series('clean', 'tslint', 'build-typescript'));
+gulp.task('watch', gulp.series('build', function (done) {
+    gulp.watch('./src/**/*', gulp.series('build'));
+    done();
+}));
+gulp.task('test', gulp.series('build', function (done) {
+    const mocha = require('gulp-mocha');
+    return gulp.src('test/**/*.ts')
+        .pipe(mocha({
+            reporter: 'spec',
+            require: ['ts-node/register'],
+            slow: 0,
+        })).once('error', (error) => {
+            done();
+            process.exit(1);
+        })
+        .once('end', () => {
+            done();
+            process.exit();
+        });
+}));

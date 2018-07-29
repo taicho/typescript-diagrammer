@@ -1,6 +1,0 @@
-"use strict";
-var Processing_1 = require("./Processing");
-var proc = Processing_1["default"].fromFile("/Users/taicho/Google Drive/Current Development/Git/typescript-diagrammer/test/dummytest.ts");
-var str = proc.emit();
-
-//# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiIiwic291cmNlcyI6WyJpbmRleC5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBzdHJpY3RcIjtcbnZhciBQcm9jZXNzaW5nXzEgPSByZXF1aXJlKFwiLi9Qcm9jZXNzaW5nXCIpO1xudmFyIHByb2MgPSBQcm9jZXNzaW5nXzFbXCJkZWZhdWx0XCJdLmZyb21GaWxlKFwiL1VzZXJzL3RhaWNoby9Hb29nbGUgRHJpdmUvQ3VycmVudCBEZXZlbG9wbWVudC9HaXQvdHlwZXNjcmlwdC1kaWFncmFtbWVyL3Rlc3QvZHVtbXl0ZXN0LnRzXCIpO1xudmFyIHN0ciA9IHByb2MuZW1pdCgpO1xuIl0sImZpbGUiOiJpbmRleC5qcyJ9

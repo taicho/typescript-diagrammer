@@ -1,1 +1,0 @@
-{"version":3,"sources":["lib/Core/Generators/JsonGenerator.ts"],"names":[],"mappings":";AAAA;IAAA;IAIA,CAAC;IAAD,oBAAC;AAAD,CAJA,AAIC,IAAA;AAJY,qBAAa,gBAIzB,CAAA","file":"JsonGenerator.js","sourcesContent":["export class JsonGenerator {\n    // static getJson(nodeList: NodeList) {\n    //     return serializeNodes(nodeList);\n    // }\n}\n"]}
